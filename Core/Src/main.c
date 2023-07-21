@@ -128,20 +128,21 @@ int main(void)
   HBridge_Init(&L293D_chanel2, in1_pin2_Pin, in2_pin2_Pin, &pwm2);
 
   HAL_GPIO_WritePin(GPIOB,L293D_chanel1.in1_pin, 1);
-
-
-  HBridge_Forward(&L293D_chanel1);
-  HBridge_Forward(&L293D_chanel2);
-
-  PWMController_Init(&pwm1, &htim1, TIM_CHANNEL_1, 1000, 0.2);
-  PWMController_Init(&pwm2, &htim1, TIM_CHANNEL_2, 1000, 0.2);
+  PWMController_Init(&pwm1, &htim1, TIM_CHANNEL_1, 1000, 0.4);
+  PWMController_Init(&pwm2, &htim1, TIM_CHANNEL_2, 1000, 0.4);
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
     /* USER CODE END WHILE */
+	  HBridge_Forward(&L293D_chanel1);
+	  HBridge_Forward(&L293D_chanel2);
+	  HAL_Delay(1000);
 
+	  HBridge_Backward(&L293D_chanel1);
+	  HBridge_Backward(&L293D_chanel2);
+	  HAL_Delay(1000);
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
