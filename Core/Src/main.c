@@ -91,7 +91,7 @@ void Motor_Forward(void);
 void Motor_Backward(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+void motor_controller(void);
 /* USER CODE END 0 */
 HBridge L293D_chanel1;
 HBridge L293D_chanel2;
@@ -140,7 +140,6 @@ int main(void)
   HBridge_Init(&L293D_chanel1, in1_pin1_Pin, in2_pin1_Pin, &pwm1);
   HBridge_Init(&L293D_chanel2, in1_pin2_Pin, in2_pin2_Pin, &pwm2);
 
-  HAL_GPIO_WritePin(GPIOB,L293D_chanel1.in1_pin, 1);
   PWMController_Init(&pwm1, &htim1, TIM_CHANNEL_1, 1000, 0.4);
   PWMController_Init(&pwm2, &htim1, TIM_CHANNEL_2, 1000, 0.4);
 
@@ -148,34 +147,32 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  motor_controller();
     /* USER CODE END WHILE */
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
 }
 
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
-{
+void motor_controller(void){
 
-    if (GPIO_Pin == Left_Pin)
+    if (HAL_GPIO_ReadPin(GPIOB, left_Pin) == HIGH)
     {
-    	HBridge_Forward(&L293D_chanel2);
-    	HBridge_Backward(&L293D_chanel1);
+    	Motor_Left() ;
     }
-    if (GPIO_Pin == Right_Pin)
+    if (HAL_GPIO_ReadPin(GPIOB, right_Pin) == HIGH)
     {
     	Motor_Right() ;
     }
-    if (GPIO_Pin == Forward_Pin)
+    if (HAL_GPIO_ReadPin(GPIOB, forward_Pin) == HIGH)
     {
     	Motor_Forward();
     }
-    else if (GPIO_Pin == Backward_Pin)
+    if (HAL_GPIO_ReadPin(GPIOB, backward_Pin) == HIGH)
     {
     	Motor_Backward();
     }
 }
-
 
 /* USER CODE END WHILE */
 void Motor_Left(void){
@@ -232,6 +229,10 @@ void PWMController_Init(PWMController *pwm, TIM_HandleTypeDef *htim, uint32_t ch
     HAL_TIM_PWM_Start(pwm->htim, pwm->channel);
 }
 
+/**
+  * @brief System Clock Configuration
+  * @retval None
+  */
 void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
@@ -413,21 +414,11 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : Left_Pin Right_Pin Forward_Pin Backward_Pin */
-  GPIO_InitStruct.Pin = Left_Pin|Right_Pin|Forward_Pin|Backward_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  /*Configure GPIO pins : left_Pin right_Pin forward_Pin backward_Pin */
+  GPIO_InitStruct.Pin = left_Pin|right_Pin|forward_Pin|backward_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI3_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(EXTI3_IRQn);
-
-  HAL_NVIC_SetPriority(EXTI4_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(EXTI4_IRQn);
-
-  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
 
 }
 
