@@ -80,10 +80,23 @@ static void MX_TIM1_Init(void);
 
 /* USER CODE END PFP */
 
+/* Private function prototypes -----------------------------------------------*/
+void SystemClock_Config(void);
+static void MX_GPIO_Init(void);
+static void MX_TIM2_Init(void);
+static void MX_TIM1_Init(void);
+void Motor_Left(void);
+void Motor_Right(void);
+void Motor_Forward(void);
+void Motor_Backward(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
 /* USER CODE END 0 */
+HBridge L293D_chanel1;
+HBridge L293D_chanel2;
+PWMController pwm1;
+PWMController pwm2;
 
 /**
   * @brief  The application entry point.
@@ -136,20 +149,57 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-	  HBridge_Forward(&L293D_chanel1);
-	  HBridge_Forward(&L293D_chanel2);
-	  HAL_Delay(1000);
-
-	  HBridge_Backward(&L293D_chanel1);
-	  HBridge_Backward(&L293D_chanel2);
-	  HAL_Delay(1000);
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
 }
 
-/* USER CODE END WHILE */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
 
+    if (GPIO_Pin == Left_Pin)
+    {
+    	HBridge_Forward(&L293D_chanel2);
+    	HBridge_Backward(&L293D_chanel1);
+    }
+    if (GPIO_Pin == Right_Pin)
+    {
+    	Motor_Right() ;
+    }
+    if (GPIO_Pin == Forward_Pin)
+    {
+    	Motor_Forward();
+    }
+    else if (GPIO_Pin == Backward_Pin)
+    {
+    	Motor_Backward();
+    }
+}
+
+
+/* USER CODE END WHILE */
+void Motor_Left(void){
+
+	HBridge_Forward(&L293D_chanel2);
+	HBridge_Backward(&L293D_chanel1);
+}
+
+void Motor_Right(void){
+
+	HBridge_Backward(&L293D_chanel2);
+	HBridge_Forward(&L293D_chanel1);
+}
+void Motor_Forward(void){
+
+	 HBridge_Forward(&L293D_chanel1);
+	 HBridge_Forward(&L293D_chanel2);
+}
+
+void Motor_Backward(void){
+
+	 HBridge_Backward(&L293D_chanel1);
+	 HBridge_Backward(&L293D_chanel2);
+}
 void HBridge_Init(HBridge *hbridge, uint16_t in1_pin, uint16_t in2_pin, PWMController *pwm) {
 
     hbridge->in1_pin = in1_pin;
@@ -181,7 +231,6 @@ void PWMController_Init(PWMController *pwm, TIM_HandleTypeDef *htim, uint32_t ch
     pwm->htim->Instance->CCR1 = pulse;
     HAL_TIM_PWM_Start(pwm->htim, pwm->channel);
 }
-
 
 void SystemClock_Config(void)
 {
@@ -363,6 +412,22 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : Left_Pin Right_Pin Forward_Pin Backward_Pin */
+  GPIO_InitStruct.Pin = Left_Pin|Right_Pin|Forward_Pin|Backward_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI3_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI3_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI4_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI4_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
 
 }
 
