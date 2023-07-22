@@ -68,14 +68,6 @@ void Error_Handler(void);
 #define in1_pin2_GPIO_Port GPIOB
 #define in2_pin2_Pin GPIO_PIN_15
 #define in2_pin2_GPIO_Port GPIOB
-#define left_Pin GPIO_PIN_3
-#define left_GPIO_Port GPIOB
-#define right_Pin GPIO_PIN_4
-#define right_GPIO_Port GPIOB
-#define forward_Pin GPIO_PIN_5
-#define forward_GPIO_Port GPIOB
-#define backward_Pin GPIO_PIN_6
-#define backward_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

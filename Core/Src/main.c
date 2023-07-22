@@ -21,6 +21,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -147,31 +148,19 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  motor_controller();
+
     /* USER CODE END WHILE */
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
 }
 
-void motor_controller(void){
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 
-    if (HAL_GPIO_ReadPin(GPIOB, left_Pin) == HIGH)
-    {
-    	Motor_Left() ;
-    }
-    if (HAL_GPIO_ReadPin(GPIOB, right_Pin) == HIGH)
-    {
-    	Motor_Right() ;
-    }
-    if (HAL_GPIO_ReadPin(GPIOB, forward_Pin) == HIGH)
-    {
-    	Motor_Forward();
-    }
-    if (HAL_GPIO_ReadPin(GPIOB, backward_Pin) == HIGH)
-    {
-    	Motor_Backward();
-    }
+	if(GPIO_Pin == GPIO_PIN_0){
+		HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_12);
+	}
+
 }
 
 /* USER CODE END WHILE */
@@ -228,7 +217,6 @@ void PWMController_Init(PWMController *pwm, TIM_HandleTypeDef *htim, uint32_t ch
     pwm->htim->Instance->CCR1 = pulse;
     HAL_TIM_PWM_Start(pwm->htim, pwm->channel);
 }
-
 /**
   * @brief System Clock Configuration
   * @retval None
@@ -407,6 +395,18 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, in1_pin1_Pin|in2_pin1_Pin|in1_pin2_Pin|in2_pin2_Pin, GPIO_PIN_RESET);
 
+  /*Configure GPIO pin : PB0 */
+  GPIO_InitStruct.Pin = GPIO_PIN_0;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PB1 PB2 PB3 */
+  GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
   /*Configure GPIO pins : in1_pin1_Pin in2_pin1_Pin in1_pin2_Pin in2_pin2_Pin */
   GPIO_InitStruct.Pin = in1_pin1_Pin|in2_pin1_Pin|in1_pin2_Pin|in2_pin2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -414,11 +414,18 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : left_Pin right_Pin forward_Pin backward_Pin */
-  GPIO_InitStruct.Pin = left_Pin|right_Pin|forward_Pin|backward_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI0_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI1_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI1_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI2_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI2_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI3_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI3_IRQn);
 
 }
 
